@@ -2,7 +2,7 @@
 // @name         whatsapp dark gallery
 // @namespace    http://js.dev.hyperco.de
 // @version      0.2
-// @description  Dark Mode for whatsapp aweb
+// @description  Dark Mode for whatsapp web
 //
 //               - image gallery gets dark background
 //               - adds four cool night modes
@@ -79,6 +79,8 @@ body.nightModeEnabled.m2 #app,
 body.nightModeEnabled.m4 #app > div {
   filter: saturate(0);
 }
+body.nightModeEnabled.m3 #app img,
+body.nightModeEnabled.m4 #app img,
 body.nightModeEnabled.m3 #app,
 body.nightModeEnabled.m4 #app {
   filter: invert();

@@ -1,12 +1,11 @@
 // ==UserScript==
-// @name         whatsapp dark gallery
+// @name         Whatsapp Web Night Mode
 // @namespace    http://js.dev.hyperco.de
 // @version      0.2
-// @description  Dark Mode for whatsapp web
+// @description  Night mode and dark gallery for whatsapp web
 //
 //               - image gallery gets dark background
 //               - adds four cool night modes
-//               - adds menu entry to control night modes
 //
 //               tested on Chrome 81 with tampermonkey 4.10 on OS X 10.14
 //
@@ -17,8 +16,53 @@
 // @run-at       document-start
 // ==/UserScript==
 
+
+const BlendModes = {
+    Absorptive: {
+        mono: false,
+        invert: false,
+    },
+    Monochrome: {
+        mono: true,
+        invert: false,
+    },
+    Night: {
+        mono: true,
+        invert: true,
+    },
+};
+
+const { Absorptive, Monochrome, Night } = BlendModes;
+
+const MODES = [
+    {
+        name: "Warm White",
+        color: "rgb(255, 224, 177)",
+        mode: Absorptive,
+    },
+    {
+        name: "Amber",
+        color: "rgb(146,120,80)",
+        mode: Absorptive,
+    },
+    {
+        name: "Sodium",
+        color: "rgb(160,100,0)",
+        mode: Monochrome,
+    },
+    {
+        name: "Barium",
+        color: "rgb(15,189,40)",
+        mode: Night,
+    },
+    {
+        name: "Xenon",
+        color: "rgb(0,148,185)",
+        mode: Night,
+    },
+];
+
 const CONFIG = {
-    AvailableModesCount: (1 + 4),
     BariumConsole: "color:#222;background:#070; padding:1px 3px 1px 4px;",
     AmberConsole: "color:#251509;background: rgba(146,120,80); padding:1px 3px 1px 4px;",
 };
@@ -36,7 +80,7 @@ const addGalleryCSS = () => GM_addStyle(`
     }
 `);
 
-const nightModeUICSS = () => GM_addStyle(`
+const addNightModeUICSS = () => GM_addStyle(`
 body li.wdg-menu-entry {
   opacity: 1.0!important;
   transition: 0.2s background, 0.1s color;
@@ -46,12 +90,46 @@ body li.wdg-menu-entry > div {
 }
 .wdg-menu-entry:hover {
   background: #f5f5f5;
-}
+}what
 body li.wdg-menu-entry:hover > div {
 }
 `);
 
-const injectNightModeCSS = () => GM_addStyle(`
+const nightModeStylesColors = () => MODES.map(
+    (it, n) => it.color && `
+    body.nightModeEnabled.m${1+n} #hard_expire_time {
+        background: ${it.color};
+    }
+`);
+
+const nightModeStylesInversion = () => MODES.map(
+    (it, n) => it.mode?.invert && `
+    body.nightModeEnabled.m${1+n} #app .emojik,
+    body.nightModeEnabled.m${1+n} #app img,
+    body.nightModeEnabled.m${1+n} #app {
+        filter: invert();
+    }
+`);
+
+const nightModeStylesSaturation = () => MODES.map(
+    (it, n) => it.mode?.mono && `
+    body.nightModeEnabled.m${1+n} #app > div {
+        filter: saturate(0);
+    }
+`);
+
+const generatedStyles = () =>
+    [
+        nightModeStylesColors(),
+        nightModeStylesInversion(),
+        nightModeStylesSaturation(),
+    ].flat().filter((it) => it).join("\n")
+;
+
+
+console.log("nightModeStylesColors", generatedStyles());
+
+const addNightModesCSS = () => GM_addStyle(`
 body.nightModeEnabled {
   transition: 0.2s filter;
 }
@@ -70,39 +148,13 @@ position: fixed;
     pointer-events: none;
     mix-blend-mode: multiply;
 }
-/* Amber */
-body.nightModeEnabled.m1 #hard_expire_time {
-  background: rgb(146,120,80);
-}
-
-body.nightModeEnabled.m2 #app,
-body.nightModeEnabled.m4 #app > div {
-  filter: saturate(0);
-}
-body.nightModeEnabled.m3 #app img,
-body.nightModeEnabled.m4 #app img,
-body.nightModeEnabled.m3 #app,
-body.nightModeEnabled.m4 #app {
-  filter: invert();
-}
-/* Xenon */
-body.nightModeEnabled.m4 #hard_expire_time {
- background: rgb(0,148,185);
-}
-/* Sodium */
-body.nightModeEnabled.m2 #hard_expire_time {
- background: rgb(160,100,0);
-}
-/* Barium */
-body.nightModeEnabled.m3 #hard_expire_time {
- background: rgb(15,189,40);
-}
+${generatedStyles()}
 `);
 
 const engageNightMode = () => {
-    !window.___injectedNightModeCSS && injectNightModeCSS();
+    !window.___injectedNightModeCSS && addNightModesCSS();
     window.___injectedNightModeCSS = true;
-    window.___activeNightModeNumber = ((window.___activeNightModeNumber || 0) + 1) % CONFIG.AvailableModesCount;
+    window.___activeNightModeNumber = ((window.___activeNightModeNumber || 0) + 1) % (1 + MODES.length);
     $("body").attr("class", `nightModeEnabled m${window.___activeNightModeNumber}`);
 
 };
@@ -125,34 +177,35 @@ const log = (...params) =>
     console.log(`%c${params.shift()}`, ...params) || true
 ;
 
+const debug = (...params) =>
+    console.debug(`%c${params.shift()}`, CONFIG.BariumConsole, ...params) || true
+;
 
-const findMenuButtonInDom = () => {
-    log("addMenuEntry::analyzing DOM", CONFIG.BariumConsole);
-    const menuButton = window.$(`div[role="button"][title="Menu"]`);
-    log("addMenuEntry::analyzing DOM:: Button found", CONFIG.BariumConsole, menuButton);
-    return menuButton;
-};
+const findMenuButtonInDom = () =>
+    log("addMenuEntry::analyzing DOM", CONFIG.BariumConsole)
+    && window.$(`div[role="button"][title="Menu"]`)
+;
 
 const addToDropdownMenu = (menu) =>
     menu.find("ul").prepend(newMenuEntry()) &&
-    log("addMenuEntry::injected into DOM ––– done.", CONFIG.BariumConsole) &&
+    debug("addMenuEntry::injected into DOM ––– done.", CONFIG.BariumConsole) &&
     turnMeOnSafely(menu, 'click', 'ul .wdg-menu-entry', engageNightMode)
 ;
 
 const menuInjector = () => {
-    const menu = findMenuButtonInDom().first().next();
-    return menu.children().length === 0 ?
-        () => 2 : {add: (func, ...params) => func && func(menu, ...params)}
+    const menu = findMenuButtonInDom()?.first()?.next();
+    return menu?.children()?.length > 0 ?
+        {add: (func, ...params) => func && func(menu, ...params)}
+        : {add: () => debug(`Whatsapp web menu injector:: menu not found. Not injecting.`)}
 };
 
-
+const safelyAddToDropDownMenu = (menu) =>
+    menu && debug("whatsapp-web-night-mode::analyzing DOM:: Menu found", CONFIG.BariumConsole)
+    && (menu.find("ul .wdg-menu-entry").length === 0)
+    && addToDropdownMenu(menu)
+;
 const analyzeDom = () =>
-    menuInjector().add(
-        (menu) =>
-            menu && log("addMenuEntry::analyzing DOM:: Menu found", CONFIG.BariumConsole)
-        && (menu.find("ul .wdg-menu-entry").length === 0)
-        && addToDropdownMenu(menu)
-    )
+    menuInjector().add(safelyAddToDropDownMenu)
 ;
 
 
@@ -161,7 +214,7 @@ const WhatsAppNightMode = {
         launcher.addEventListener("click", analyzeDom)
         || addGalleryCSS()
         && log("engaging whatsapp dark gallery", CONFIG.AmberConsole)
-        && nightModeUICSS()
+        && addNightModeUICSS()
         && log("injected night mode UI styles",CONFIG.BariumConsole)
 };
 

@@ -104,6 +104,8 @@ const nightModeStylesColors = () => MODES.map(
 
 const nightModeStylesInversion = () => MODES.map(
     (it, n) => it.mode?.invert && `
+    body.nightModeEnabled.m${1+n} #app .video-thumb,
+    body.nightModeEnabled.m${1+n} #app span.bg-color-1 + div + div,
     body.nightModeEnabled.m${1+n} #app .emojik,
     body.nightModeEnabled.m${1+n} #app img,
     body.nightModeEnabled.m${1+n} #app {

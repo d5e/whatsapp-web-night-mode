@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Whatsapp Web Night Mode
 // @namespace    http://js.dev.hyperco.de
-// @version      0.2
+// @version      0.2.1
 // @description  Night mode and dark gallery for whatsapp web
 //
 //               - image gallery gets dark background
@@ -46,9 +46,14 @@ const MODES = [
         mode: Absorptive,
     },
     {
-        name: "Sodium",
+        name: "Bromine",
         color: "rgb(160,100,0)",
         mode: Monochrome,
+    },
+    {
+        name: "Sodium",
+        color: "rgb(255,137,3)",
+        mode: Night,
     },
     {
         name: "Barium",
@@ -129,7 +134,6 @@ const generatedStyles = () =>
 ;
 
 
-console.log("nightModeStylesColors", generatedStyles());
 
 const addNightModesCSS = () => GM_addStyle(`
 body.nightModeEnabled {
@@ -175,22 +179,18 @@ const turnMeOnSafely = (menu, ...props) =>
     menu.off(...props) && menu.on(...props)
 ;
 
-const log = (...params) =>
-    console.log(`%c${params.shift()}`, ...params) || true
-;
-
 const debug = (...params) =>
     console.debug(`%c${params.shift()}`, CONFIG.BariumConsole, ...params) || true
 ;
 
 const findMenuButtonInDom = () =>
-    log("addMenuEntry::analyzing DOM", CONFIG.BariumConsole)
+    debug("addMenuEntry::analyzing DOM")
     && window.$(`div[role="button"][title="Menu"]`)
 ;
 
 const addToDropdownMenu = (menu) =>
     menu.find("ul").prepend(newMenuEntry()) &&
-    debug("addMenuEntry::injected into DOM ––– done.", CONFIG.BariumConsole) &&
+    debug("addMenuEntry::injected into DOM ––– done.") &&
     turnMeOnSafely(menu, 'click', 'ul .wdg-menu-entry', engageNightMode)
 ;
 
@@ -202,7 +202,7 @@ const menuInjector = () => {
 };
 
 const safelyAddToDropDownMenu = (menu) =>
-    menu && debug("whatsapp-web-night-mode::analyzing DOM:: Menu found", CONFIG.BariumConsole)
+    menu && debug("whatsapp-web-night-mode::analyzing DOM:: Menu found")
     && (menu.find("ul .wdg-menu-entry").length === 0)
     && addToDropdownMenu(menu)
 ;
@@ -215,9 +215,9 @@ const WhatsAppNightMode = {
     engage: (launcher) =>
         launcher.addEventListener("click", analyzeDom)
         || addGalleryCSS()
-        && log("engaging whatsapp dark gallery", CONFIG.AmberConsole)
+        && debug("engaging whatsapp dark gallery")
         && addNightModeUICSS()
-        && log("injected night mode UI styles",CONFIG.BariumConsole)
+        && debug("injected night mode UI styles")
 };
 
 

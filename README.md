@@ -12,7 +12,12 @@ Whatsapp Web Night Mode is an open source piece of code which enables four disti
 
 ## How to install
 
-Add content of main.js to your new tampermonkey script.
+1. Install tampermonkey inside your google chrome.
+2. Open tampermonkey dashboard and create new scrip
+3. paste contents of main.js to your newly created tampermonkey script.
+4. save script
+5. open or reload whatsapp web
+6. find the "Night mode ☾"control button inside the main menu
 
 ## Acknowledgements
 

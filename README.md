@@ -4,6 +4,10 @@
 
 Whatsapp Web Night Mode is an open source piece of code which enables four distinctive night modes in your whatsapp-web session, plus a dark background image gallery to protect your eyes during the night. Recommended for all night owls.
 
+## How does it look like?
+
+Check out the demo video in the root directory of the project to have a look at the default night modes. On top of that the night modes are easily configurable from the source code.
+
 ## Requirements
 
 - Google Chrome https://www.google.com/intl/en_en/chrome/

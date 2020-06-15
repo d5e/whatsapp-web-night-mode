@@ -165,10 +165,10 @@ const engageNightMode = () => {
 
 };
 
-const newMenuEntry = () => `
-<li tabindex="-1" class="_3L0q3 _167q _36Zz0 wdg-menu-entry"
+const newMenuEntry = (menu, elementClasses = getElementClassesBelow(menu)) => `
+<li tabindex="-1" class="${elementClasses[0]} wdg-menu-entry"
  data-animate-dropdown-item="true">
-    <div class="Pm0Ov _34D8D" role="button" title="New group">
+    <div class="${elementClasses[1]}" role="button" title="New group">
       Night Mode ☾
     </div>
 </li>
@@ -189,9 +189,13 @@ const findMenuButtonInDom = () =>
 ;
 
 const addToDropdownMenu = (menu) =>
-    menu.find("ul").prepend(newMenuEntry()) &&
+    menu.find("ul").prepend(newMenuEntry(menu)) &&
     debug("addMenuEntry::injected into DOM ––– done.") &&
     turnMeOnSafely(menu, 'click', 'ul .wdg-menu-entry', engageNightMode)
+;
+
+const getElementClassesBelow = (parent) =>
+    [parent.find("ul:first-child > li:first-child").attr("class"), parent.find("ul:first-child > li:first-child > div:first-child").attr("class")]
 ;
 
 const menuInjector = () => {

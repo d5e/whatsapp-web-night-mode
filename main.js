@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Whatsapp Web Night Mode
 // @namespace    http://js.dev.hyperco.de
-// @version      0.2.1
+// @version      0.2.2
 // @description  Night mode and dark gallery for whatsapp web
 //
 //               - image gallery gets dark background
